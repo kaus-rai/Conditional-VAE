@@ -1,24 +1,44 @@
 import model
 import torch
+import torch.nn as nn
 import torch.optim as optim
-from torchvision import datasets, transforms
-from utils import lossFunction, oneHotEncoding, save_reconstructed_images
+from torchvision import datasets
+import torchvision.transforms as transforms
+from torch.utils.data import DataLoader
+import torchvision
+from torchvision.utils import make_grid
+from utils import save_reconstructed_images
+
+from engine import train, validate
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 batch_size = 100
 train_loss = 0
-epoch = 100
-train_dataset = datasets.MNIST(root='./mnist_data/', train=True, transform=transforms.ToTensor(), download=True)
-train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
+epochs = 100
 
-cond_dim = train_loader.dataset.train_labels.unique().size(0)
+transform = transforms.Compose([
+    transforms.Resize((32, 32)),
+    transforms.ToTensor(),
+])
 
-cvae = model.CVAE(x_dim=784, h_dim1=512, h_dim2=256, z_dim=2, c_dim=cond_dim)
+trainset = datasets.MNIST(root='./mnist_data/', train=True, transform=transforms.ToTensor(), download=True)
+testset = datasets.MNIST(root='./mnist_data/', train=False, transform=transforms.ToTensor(), download=False)
 
-optimizer = optim.Adam(cvae.parameters())
+# Data Loader (Input Pipeline)
+trainloader = torch.utils.data.DataLoader(dataset=trainset, batch_size=batch_size, shuffle=True)
+testloader = torch.utils.data.DataLoader(dataset=testset, batch_size=batch_size, shuffle=False)
+
+cond_dim = trainloader.dataset.train_labels.unique().size(0)
+
+model = model.CVAE(x_dim=784, h_dim1=512, h_dim2=256, z_dim=2, c_dim=cond_dim)
+
+optimizer = optim.Adam(model.parameters())
+criterion = nn.BCELoss(reduction='sum')
 
 train_loss = []
 valid_loss = []
+grid_images = []
+
 for epoch in range(epochs):
     print(f"Epoch {epoch+1} of {epochs}")
     train_epoch_loss = train(
@@ -39,9 +59,9 @@ for epoch in range(epochs):
     print(f"Val Loss: {valid_epoch_loss:.4f}")
 
     # save the reconstructions as a .gif file
-image_to_vid(grid_images)
+# image_to_vid(grid_images)
 # save the loss plots to disk
-save_loss_plot(train_loss, valid_loss)
+# save_loss_plot(train_loss, valid_loss)
 print('TRAINING COMPLETE')
     
 

@@ -25,13 +25,13 @@ class CVAE(nn.Module):
     def sampling(self, mu, log_var):
         std = torch.exp(0.5*log_var)
         eps = torch.randn_like(std)
-        return eps.mul(std).add(mu) # return z sample
+        return mu+(eps*std) # return z sample
     
     def decoder(self, z, c):
         concat_input = torch.cat([z, c], 1)
         h = F.relu(self.fc4(concat_input))
         h = F.relu(self.fc5(h))
-        return F.sigmoid(self.fc6(h))
+        return torch.sigmoid(self.fc6(h))
     
     def forward(self, x, c):
         mu, log_var = self.encoder(x.view(-1, 784), c)
