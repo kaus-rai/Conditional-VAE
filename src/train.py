@@ -7,14 +7,14 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 import torchvision
 from torchvision.utils import make_grid
-from utils import save_reconstructed_images
+from utils import save_reconstructed_images, save_loss_plot
 
 from engine import train, validate
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 batch_size = 100
 train_loss = 0
-epochs = 100
+epochs = 50
 
 transform = transforms.Compose([
     transforms.Resize((32, 32)),
@@ -61,7 +61,7 @@ for epoch in range(epochs):
     # save the reconstructions as a .gif file
 # image_to_vid(grid_images)
 # save the loss plots to disk
-# save_loss_plot(train_loss, valid_loss)
+save_loss_plot(train_loss, valid_loss)
 print('TRAINING COMPLETE')
     
 
