@@ -63,13 +63,6 @@ for epoch in range(epochs):
 # save the loss plots to disk
 save_loss_plot(train_loss, valid_loss)
 print('TRAINING COMPLETE')
-    
-
-    # if batch_idx % 100 == 0:
-    #         print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-    #             epoch, batch_idx * len(data), len(train_loader.dataset),
-    #             100. * batch_idx / len(train_loader), loss.item() / len(data)))
-    # print('====> Epoch: {} Average loss: {:.4f}'.format(epoch, train_loss))
 
 
 
