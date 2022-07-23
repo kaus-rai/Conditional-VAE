@@ -4,6 +4,7 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 from torchvision.utils import save_image
 import matplotlib.pyplot as plt
+import os
 
 def lossFunction(recon_x, x, mu, log_var):
     BCE = F.binary_cross_entropy(recon_x, x.view(-1, 784), reduction='sum')
@@ -20,7 +21,9 @@ def oneHotEncoding(labels, class_size):
 
 
 def save_reconstructed_images(recon_images, epoch):
-    save_image(recon_images.cpu(), f"output{epoch}.jpg")
+    if not os.path.isdir('./images'):
+        os.mkdir('./images')
+    save_image(recon_images.cpu(), f"./images/output{epoch}.jpg")
 
 
 def save_loss_plot(train_loss, valid_loss):
