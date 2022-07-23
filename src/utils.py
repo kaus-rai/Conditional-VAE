@@ -6,9 +6,12 @@ from torchvision.utils import save_image
 import matplotlib.pyplot as plt
 import os
 import numpy as np
+import model
 
-def lossFunction(recon_x, x, mu, log_var):
-    BCE = F.binary_cross_entropy(recon_x, x.view(-1, 784), reduction='sum')
+model = model.CVAE()
+
+def lossFunction(x, pred, mu, log_var):
+    BCE = F.mse_loss(pred, x, reduction='sum')
     KLD = -0.5 * torch.sum(1 + log_var - mu.pow(2) - log_var.exp())
 
     return BCE+KLD
@@ -23,13 +26,14 @@ def oneHotEncoding(labels, class_size):
 
 def generate_image(epoch, z, y, model):
     with torch.no_grad():
-        label = np.zeroes((y.shape[0], 10))
+        label = np.zeros((y.shape[0], 10))
         label[np.arange(z.shape[0]), y] = 1
+        label = torch.tensor(label)
 
-        pred = model.decoder(torch.cat(z, label.float()), dim=1)
+        pred = model.decoder(torch.cat((z,label.float()), dim=1))
         plot(epoch, pred.cpu().data.numpy(), y.cpu().data.numpy(),name='Eval_')
         print("data Plotted")
-        
+
 
 def plot(epoch, pred, y,name='test_'):
     if not os.path.isdir('./images'):

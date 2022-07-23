@@ -15,14 +15,11 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 batch_size = 100
 learning_rate = 1e-3
 epoches = 100
-device = torch.device("cuda")
 num_workers = 5
 load_epoch = -1
 generate = True
 
-
 transform = transforms.Compose([
-    transforms.Resize((32, 32)),
     transforms.ToTensor(),
 ])
 
@@ -44,12 +41,12 @@ for epoch in range(epoches):
     print(f"Epoch {epoch+1} of {epoches}")
     model.train()
     train_epoch_loss = train(
-        epoch, model, trainloader, optimizer
+        epoch, model, trainloader, trainset, optimizer
     )
 
     with torch.no_grad():
-        test_epoch_loss, recon_images = test(
-            epoch, model, testloader
+        test_epoch_loss = test(
+            epoch, model, testloader, testset, optimizer
         )
 
         if(generate):
@@ -60,7 +57,7 @@ for epoch in range(epoches):
     train_loss.append(train_epoch_loss)
     test_loss.append(test_epoch_loss)
 
-    save_image(model, epoch)
+    # save_image(model, epoch)
 
     # save the reconstructed images from the validation loop
     # save_reconstructed_images(recon_images, epoch+1)

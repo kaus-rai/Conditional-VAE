@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-device = torch.device("cuda")
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 class CVAE(nn.Module):
     def __init__(self, latent_size=32, num_class=10):
@@ -18,13 +18,13 @@ class CVAE(nn.Module):
         self.logvar = nn.Linear(300, self.latent_size)
 
         #Decoder
-        self.linear2 = nn.Linear(self.latent_size + self.num_classes, 300)
+        self.linear2 = nn.Linear(self.latent_size + self.num_class, 300)
         self.linear3 = nn.Linear(300, 4*4*32)
-        self.conv3 = nn.ConvTransponse2d(32, 16, kernel_size=5, stride=2)
-        self.conv4 = nn.ConvTransponse2d(16, 1, kernel_size=5, stride=2)
-        self.conv5 = nn.ConvTransponse2d(1, 1, kernel_size=4)
+        self.conv3 = nn.ConvTranspose2d(32, 16, kernel_size=5, stride=2)
+        self.conv4 = nn.ConvTranspose2d(16, 1, kernel_size=5, stride=2)
+        self.conv5 = nn.ConvTranspose2d(1, 1, kernel_size=4)
     
-    def encoder(self, x, c):
+    def encoder(self, x, y):
         y = torch.argmax(y, dim=1).reshape(y.shape[0],1,1,1)
         y = torch.ones(x.shape).to(device)*y
         t = torch.cat((x,y), dim=1)

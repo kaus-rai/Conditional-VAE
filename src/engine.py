@@ -2,17 +2,19 @@ from tqdm import tqdm
 import torch
 from utils import lossFunction, oneHotEncoding, save_reconstructed_images
 import numpy as np
+import traceback
+import sys
 
 batch_size=100
 
 #model, dataloader, dataset, device, optimizer, criterion
-def train(epoch, model, train_loader, optim):
+def train(epoch, model, train_loader, dataset, optim):
     reconstruction_loss = 0
     total_loss = 0
 
-    for i,(x,y) in enumerate(train_loader):
+    for i,(x,y) in tqdm(enumerate(train_loader), total=int(len(dataset)/train_loader.batch_size)):
         try:
-            label = np.zeroes((x.shape[0], 10))
+            label = np.zeros((x.shape[0], 10))
             label[np.arange(x.shape[0]), y] = 1
             label = torch.tensor(label)
 
@@ -26,32 +28,31 @@ def train(epoch, model, train_loader, optim):
             total_loss += loss.cpu().data.numpy()*x.shape[0]
 
         except Exception as e:
-            print("Something went wrong in Train Function")
+            exc_info = sys.exc_info()
+            traceback.print_exception(*exc_info)
+            break
         
         total_loss /= len(train_loader.dataset) 
 
     return total_loss
 
-def test(epoch, model, test_loader, optim):
-    reconstruction_loss = 0
+def test(epoch, model, test_loader,dataset, optim):
     total_loss = 0
     with torch.no_grad():
-        for i,(x,y) in enumerate(test_loader):
+        for i,(x,y) in tqdm(enumerate(test_loader), total=int(len(dataset)/test_loader.batch_size)):
             try:
-                label = np.zeroes((x.shape[0], 10))
+                label = np.zeros((x.shape[0], 10))
                 label[np.arange(x.shape[0]), y] = 1
                 label = torch.tensor(label)
 
                 pred, mu, logvar = model(x, label)
-
                 loss = lossFunction(x, pred, mu, logvar)
-                loss.backward()
-                optim.step()
 
                 total_loss += loss.cpu().data.numpy()*x.shape[0]
 
             except Exception as e:
-                print("Something went wrong in Test Function")
+                exc_info = sys.exc_info()
+                traceback.print_exception(*exc_info)
             
             total_loss /= len(test_loader.dataset) 
 
