@@ -60,7 +60,7 @@ class CVAE(nn.Module):
     
     
     def forward(self, x, y):
-        mu, log_var = self.encoder(x, y)
+        mu, logvar = self.encoder(x, y)
         z = self.reparameterize(mu, logvar)
 
         #Addition of Class condition
